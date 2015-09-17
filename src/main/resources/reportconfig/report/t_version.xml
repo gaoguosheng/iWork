@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<applications xmlns="http://www.wabacus.com"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.wabacus.com ../xsd/wabacus.applications.xsd">
+  <!-- KPI管理 -->
+<page id="t_version_list">
+  <report id="report1"  extends="basePage.editList2">
+    <display>
+      <col column="{sequence:1}" label="序号" />
+      <col column="id" displaytype="hidden"/>
+      <col column="creuser" displaytype="hidden"/>   
+      <col column="project" label="项目" clickorderby="true"/>
+      <col column="version" label="版本" width="160px" clickorderby="true" align="left">
+      	<inputbox type="textareabox"  styleproperty="style='width:100%;'"></inputbox>
+      </col>
+      <col column="planfinishdate" label="计划完成时间" clickorderby="true">
+       	<inputbox type="datepicker"  dateformat="yyyy-MM-dd"></inputbox>
+      </col>
+      <col column="devstatus" label="开发状态" clickorderby="true">
+      		<inputbox type="selectbox">
+                        <option dataset="@{select * from t_data where ddtype ='devstatus' order by code}" label="name" value="code"></option>
+            </inputbox>
+      </col>
+      <col column="developer" label="开发人员" clickorderby="true"/>
+      <col column="tester" label="测试人员" clickorderby="true"/>
+      <col column="devfinishdate" label="开发完成时间" clickorderby="true">
+       	<inputbox type="datepicker"  dateformat="yyyy-MM-dd"></inputbox>
+      </col>
+      <col column="testfinishdate" label="测试通过时间" clickorderby="true">
+       	<inputbox type="datepicker"  dateformat="yyyy-MM-dd"></inputbox>
+      </col>
+      <col column="deploystatus" label="布署状态" clickorderby="true">
+      	<inputbox type="selectbox">
+                        <option dataset="@{select * from t_data where ddtype ='deploystatus' order by code}" label="name" value="code"></option>
+            </inputbox>
+      </col>
+      <col column="deploydate" label="布署时间" clickorderby="true">
+       	<inputbox type="datepicker"  dateformat="yyyy-MM-dd"></inputbox>
+      </col>
+      <col column="remark" label="备注" align="left">
+					<inputbox type="textareabox"  styleproperty="style='width:100%;'"></inputbox>
+	  </col>
+    </display>
+    <sql>
+      <select>
+      <value><![CDATA[      select * from v_version  where {#condition#}
+          order by credate desc
+         ]]></value>
+      				<condition name="project" label="项目" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       project like '%#data#%'
+                                ]]>
+                        </value>
+                    </condition>   
+      			<condition name="version" label="版本" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       version like '%#data#%'
+                                ]]>
+                        </value>
+                </condition>      		
+                
+                <condition name="developer" label="开发人员" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       developer like '%#data#%'
+                                ]]>
+                        </value>
+                </condition>    
+                <condition name="tester" label="测试人员" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       tester like '%#data#%'
+                                ]]>
+                        </value>
+                </condition>    
+                <condition name="devstatus" label="开发状态" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       devstatus='#data#'
+                                ]]>
+                        </value>
+                        <inputbox type="selectbox">
+                        	<option value="" label="全部"></option>
+                        	<option dataset="@{select * from t_data where ddtype ='devstatus' order by code}" label="name" value="code"></option>
+           				 </inputbox>
+                </condition>    
+                <condition name="deploystatus" label="布署状态" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       deploystatus='#data#'
+                                ]]>
+                        </value>
+                        <inputbox type="selectbox">、
+                        	<option value="" label="全部"></option>
+                        	<option dataset="@{select * from t_data where ddtype ='deploystatus' order by code}" label="name" value="code"></option>
+            			</inputbox>
+                </condition>    
+                <condition name="creuser" label="创建人" labelposition="left" hidden="true" defaultvalue="session{admin.username}">
+                        <value>
+                            <![CDATA[
+                                       creuser='#data#'
+                                ]]>
+                        </value>
+                    </condition>
+      </select>
+      <insert>
+      <![CDATA[
+      insert into t_version(
+@{project},@{version},@{devstatus},@{deploystatus},@{developer},@{tester},
+@{planfinishdate},@{devfinishdate},@{testfinishdate},@{deploydate},@{remark},
+creuser=session{admin.username},credate=now() )
+      ]]>
+      </insert>
+      <update>
+      <![CDATA[
+      update t_version(@{project},@{version},@{devstatus},@{deploystatus},@{developer},@{tester},
+      @{planfinishdate},@{devfinishdate},@{testfinishdate},@{deploydate},@{remark},
+      ediuser=session{admin.username},edidate=now() )
+      where id=@{id}
+      ]]>
+      </update>
+      <delete><![CDATA[delete from t_version where id=@{id}]]></delete>
+    </sql>
+    <format>
+    	<imports>
+    		<import>com.ggs.dao.*</import>    
+    		<import>com.ggs.util.*</import> 		    	
+    	</imports>
+    	<value>
+	    	<![CDATA[
+	    		devstatus = ComDAO.getDDName("devstatus",devstatus);
+	    		deploystatus = ComDAO.getDDName("deploystatus",deploystatus);
+	    	 ]]>
+    	</value>
+    </format>
+  </report>
+</page>
+
+
+ <!-- 版本查询 -->
+<page id="version_list">
+  <report id="report1"  extends="t_version_list.report1" type="list">
+    
+    <sql>
+      <select>
+      <value><![CDATA[      select * from v_version  where {#condition#}
+                                        order by credate desc
+          ]]></value>
+      				<condition name="project" label="项目" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       project like '%#data#%'
+                                ]]>
+                        </value>
+                    </condition>   
+      			<condition name="version" label="版本" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       version like '%#data#%'
+                                ]]>
+                        </value>
+                </condition>      		
+                
+                <condition name="developer" label="开发人员" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       developer like '%#data#%'
+                                ]]>
+                        </value>
+                </condition>    
+                <condition name="tester" label="测试人员" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       tester like '%#data#%'
+                                ]]>
+                        </value>
+                </condition>    
+                <condition name="devstatus" label="开发状态" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       devstatus='#data#'
+                                ]]>
+                        </value>
+                        <inputbox type="selectbox">
+                        	<option value="" label="全部"></option>
+                        	<option dataset="@{select * from t_data where ddtype ='devstatus' order by code}" label="name" value="code"></option>
+           				 </inputbox>
+                </condition>    
+                <condition name="deploystatus" label="布署状态" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       deploystatus='#data#'
+                                ]]>
+                        </value>
+                        <inputbox type="selectbox">、
+                        	<option value="" label="全部"></option>
+                        	<option dataset="@{select * from t_data where ddtype ='deploystatus' order by code}" label="name" value="code"></option>
+            			</inputbox>
+                </condition>                  
+      </select>
+    </sql>   
+  </report>
+</page>
+
+</applications>

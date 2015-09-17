@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<applications xmlns="http://www.wabacus.com"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.wabacus.com ../xsd/wabacus.applications.xsd">
+  <!-- KPI管理 -->
+<page id="t_task_list">
+  <report id="report1"  extends="basePage.editList2">
+    <display>
+      <col column="{sequence:1}" label="序号" />
+      <col column="id" displaytype="hidden"/>
+        <col column="creuser_name" displaytype="hidden"/>
+        <col column="touser_name" displaytype="hidden"/>
+        <col column="schedule_name" displaytype="hidden"/>
+        <col column="creday" label="下达时间" clickorderby="true"/>
+        <col column="creuser" label="下达人" clickorderby="true"/>
+      <col column="project" label="项目" clickorderby="true"/>
+      <col column="task" label="任务" width="180px" clickorderby="true" align="left">
+      	<inputbox type="textareabox"  styleproperty="style='width:100%;'"></inputbox>
+      </col>
+      <col column="target" label="目标" width="180px" clickorderby="true" align="left">
+      	<inputbox type="textareabox"  styleproperty="style='width:100%;'"></inputbox>
+      </col>
+      <col column="planfinishdate" label="计划完成时间" clickorderby="true">
+       	<inputbox type="datepicker"  dateformat="yyyy-MM-dd"></inputbox>
+      </col>
+        <col column="touser" label="责任人" clickorderby="true">
+            <inputbox type="combox" >
+                <option dataset="@{select * from v_user}" label="realname" value="username"></option>
+            </inputbox>
+        </col>
+        <col column="schedule" label="完成进度">
+            <inputbox type="selectbox">
+                <option dataset="@{select * from v_data where ddtype='schedule'}" label="name" value="code"></option>
+            </inputbox>
+        </col>
+        <col column="finishresult " label="完成情况" width="180px" clickorderby="true" align="left">
+      	<inputbox type="textareabox"  styleproperty="style='width:100%;'"></inputbox>
+      </col>
+    </display>
+    <sql>
+      <select>
+      <value><![CDATA[      select * from v_task  where {#condition#}  order by credate desc   ]]></value>
+
+      				<condition name="project" label="项目" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       project like '%#data#%'
+                                ]]>
+                        </value>
+                    </condition>   
+      			<condition name="task" label="任务" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       task like '%#data#%'
+                                ]]>
+                        </value>
+                </condition>      		
+                
+                <condition name="touser_name" label="责任人" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       touser_name like '%#data#%'
+                                ]]>
+                        </value>
+                </condition>               
+                <condition name="creuser" label="创建人" labelposition="left" hidden="true" defaultvalue="session{admin.username}">
+                        <value>
+                            <![CDATA[
+                                       creuser='#data#'
+                                ]]>
+                        </value>
+                    </condition>
+      </select>
+      <insert>
+      <![CDATA[
+      insert into t_task(
+@{project},@{task},@{target},@{touser},@{planfinishdate},@{finishresult},@{schedule},
+creuser=session{admin.username},credate=now() )
+      ]]>
+      </insert>
+      <update>
+      <![CDATA[
+      update t_task(@{project},@{task},@{target},@{touser},@{planfinishdate},@{finishresult},@{schedule},
+      ediuser=session{admin.username},edidate=now() )
+      where id=@{id}
+      ]]>
+      </update>
+      <delete><![CDATA[delete from t_task where id=@{id}]]></delete>
+    </sql>
+      <format>
+          <value>
+              <![CDATA[
+                      touser=touser_name;
+                      creuser=creuser_name;
+                      schedule=schedule_name;
+                      ]]>
+          </value>
+      </format>
+  </report>
+</page>
+
+
+ <!-- 版本查询 -->
+<page id="task_list">
+  <report id="report1"  extends="t_task_list.report1" type="list">
+    <sql>
+      <select>
+      <value><![CDATA[      select *  from v_task  where {#condition#}    order by credate desc
+      											      ]]>
+      </value>
+          <condition name="creday1" label="下达时间" labelposition="left">
+              <value>
+                  <![CDATA[
+                                               left(credate,10) >= '#data#'
+                                        ]]>
+              </value>
+              <inputbox type="datepicker"  dateformat="yyyy-MM-dd"></inputbox>
+          </condition>
+          <condition name="creday2" label="-" labelposition="left">
+              <value>
+                  <![CDATA[
+                                                       left(credate,10) <= '#data#'
+                                                ]]>
+              </value>
+              <inputbox type="datepicker"  dateformat="yyyy-MM-dd"></inputbox>
+          </condition>
+      				<condition name="project" label="项目" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       project like '%#data#%'
+                                ]]>
+                        </value>
+                    </condition>   
+      			<condition name="task" label="任务" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       task like '%#data#%'
+                                ]]>
+                        </value>
+                </condition>
+                
+                <condition name="creuser_name" label="下达人" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       creuser_name like '%#data#%'
+                                ]]>
+                        </value>
+                </condition>      		
+                
+                <condition name="touser_name" label="责任人" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       touser_name like '%#data#%'
+                                ]]>
+                        </value>
+                </condition>                             
+      </select>
+    </sql>   
+  </report>
+</page>
+
+    <!-- 版本查询 -->
+    <page id="my_task_list">
+        <report id="report1"  extends="t_task_list.report1" >
+            <sql>
+                <select>
+                    <value><![CDATA[      select *  from v_task  where {#condition#}    order by credate desc
+      											      ]]>
+                    </value>
+                    <condition name="creday1" label="下达时间" labelposition="left">
+                        <value>
+                            <![CDATA[
+                                               left(credate,10) >= '#data#'
+                                        ]]>
+                        </value>
+                        <inputbox type="datepicker"  dateformat="yyyy-MM-dd"></inputbox>
+                    </condition>
+                    <condition name="creday2" label="-" labelposition="left">
+                        <value>
+                            <![CDATA[
+                                                       left(credate,10) <= '#data#'
+                                                ]]>
+                        </value>
+                        <inputbox type="datepicker"  dateformat="yyyy-MM-dd"></inputbox>
+                    </condition>
+                    <condition name="project" label="项目" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       project like '%#data#%'
+                                ]]>
+                        </value>
+                    </condition>
+                    <condition name="task" label="任务" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       task like '%#data#%'
+                                ]]>
+                        </value>
+                    </condition>
+
+                    <condition name="creuser_name" label="下达人" labelposition="left" >
+                        <value>
+                            <![CDATA[
+                                       creuser_name like '%#data#%'
+                                ]]>
+                        </value>
+                    </condition>
+
+                    <condition name="touser" label="责任人" labelposition="left" hidden="true" defaultvalue="session{admin.username}">
+                        <value>
+                            <![CDATA[
+                                       touser='#data#'
+                                ]]>
+                        </value>
+                    </condition>
+                </select>
+                <update>
+                    <![CDATA[
+                              update t_task(@{finishresult},@{schedule},
+                              ediuser=session{admin.username},edidate=now() )
+                              where id=@{id}
+                              ]]>
+                </update>
+            </sql>
+        </report>
+    </page>
+
+
+</applications>

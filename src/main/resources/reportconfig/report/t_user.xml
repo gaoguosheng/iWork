@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<applications xmlns="http://www.wabacus.com"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.wabacus.com ../xsd/wabacus.applications.xsd">
+<page id="t_user_list">
+  <report id="report1"  extends="basePage.editList2">
+    <display>
+      <col column="{sequence:1}" label="序号" />
+      <col column="username" label="用户名"/>
+      <col column="password" label="password"  displaytype="hidden" defaultvalue="idRWzxMryPo="/>
+      <col column="realname" label="姓名"/>
+      <col column="email" label="邮箱"/>
+      <col column="mobile" label="手机"/>
+      <col column="qq" label="qq"/>
+    </display>
+    <sql>
+      <select>
+      <value><![CDATA[      select * from v_user   where {#condition#}     ]]></value>
+          <condition name="realname" label="姓名" labelposition="left">
+              <value>
+                  <![CDATA[
+                                       realname like '%#data#%'
+                                ]]>
+              </value>
+
+              <inputbox>
+                  <typeprompt count="15">
+                      <promptcol label="realname" title="姓名" matchmode="start"></promptcol>
+                      <datasource>        <option dataset="@{select realname from v_user where {#matchcondition#}}"></option>       </datasource>
+                  </typeprompt>
+              </inputbox>
+
+          </condition>
+      </select>
+      <insert>
+      <![CDATA[
+      insert into t_user(
+@{username},@{password},@{realname},@{email},@{mobile},@{qq})
+      ]]>
+      </insert>
+      <update>
+      <![CDATA[
+      update t_user(@{realname},@{email},@{mobile},@{qq})
+      where username=@{username}
+      ]]>
+      </update>
+      <delete><![CDATA[delete from v_user where username=@{username}]]></delete>
+    </sql>
+  </report>
+</page>
+
+
+    <page id="user_list">
+        <report id="report1"  extends="t_user_list.report1" type="list">
+        </report>
+    </page>
+
+</applications>

@@ -1,0 +1,5 @@
+/**ggs修改下拉选中样式 build0731*/
+option.selected {
+    color: White;
+    background-color: Cyan;
+}

@@ -1,0 +1,70 @@
+
+<div class="pageContent">
+	
+	<form method="post" class="pageForm required-validate" >
+		<div class="pageFormContent" layoutH="58">
+			<div class="unit">
+				<label>旧密码：</label>
+				<input type="password" id="oldPassword" name="oldPassword" size="30" minlength="6" maxlength="20" class="required" />
+			</div>
+			<div class="unit">
+				<label>新密码：</label>
+				<input type="password" id="cp_newPassword" name="newPassword" size="30" minlength="6" maxlength="20" class="required alphanumeric"/>
+			</div>
+			<div class="unit">
+				<label>重复输入新密码：</label>
+				<input type="password"  name="rnewPassword" size="30" equalTo="#cp_newPassword" class="required alphanumeric"/>
+			</div>
+			
+		</div>
+		<div class="formBar">
+			<ul>
+				<li><div class="buttonActive"><div class="buttonContent"><button type="button" onclick="f_updatePwd();">提交</button></div></div></li>
+				<li><div class="button"><div class="buttonContent"><button type="button" class="close">取消</button></div></div></li>
+			</ul>
+		</div>
+	</form>
+	
+</div>
+
+<script type="text/javascript">
+	/**
+	 * 修改密码
+	 */
+	function f_updatePwd(){
+
+        $.ajax({
+            type: "POST",
+            url: "main!checkOldPwd.action",
+            data: {password:$("#oldPassword").val()},
+            dataType:"json",
+            success: function(json){
+                if (json.issuccess){
+                    f_updateNewPwd();
+                }else{
+                    alertMsg.info("旧密码不正确！");
+                }
+            }
+        });
+
+
+
+	}
+
+    function f_updateNewPwd(){
+        $.ajax({
+            type: "POST",
+            url: "main!updatePwd.action",
+            data: {password:$("#cp_newPassword").val()},
+            dataType:"json",
+            success: function(json){
+                if (json.issuccess){
+                    alertMsg.info("修改密码成功！");
+                }else{
+                    alertMsg.info("修改密码失败！");
+                }
+            }
+        });
+    }
+
+     </script>

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<applications xmlns="http://www.wabacus.com"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.wabacus.com ../xsd/wabacus.applications.xsd">
+  <!-- KPI管理 -->
+<page id="t_kpi_list">
+  <report id="report1"  extends="basePage.editList2">
+    <display>
+      <col column="{sequence:1}" label="序号" />
+      <col column="id" displaytype="hidden"/>
+      <col column="creuser_name" displaytype="hidden"/>
+        <col column="touser_name" displaytype="hidden"/>
+        <col column="finishresult_name" displaytype="hidden"/>
+
+        <col column="creym" label="下达时间" clickorderby="true"/>
+        <col column="creuser" label="下达人" clickorderby="true"/>
+        <col column="content" label="任务内容" clickorderby="true" width="240px"  align="left" >
+             <inputbox type="textareabox"  styleproperty="style='width:100%;'" ></inputbox>
+        </col>
+        <col column="touser" label="责任人" clickorderby="true">
+            <inputbox type="combox" >
+                <option dataset="@{select * from v_user}" label="realname" value="username"></option>
+            </inputbox>
+        </col>
+        <col column="finishdate" label="完成时间" clickorderby="true">
+                <inputbox type="datepicker"  dateformat="yyyy-MM-dd"></inputbox>
+        </col>
+        <col column="finishflag" label="完成标记" clickorderby="true">
+            <inputbox type="textareabox"  styleproperty="style='width:100%;'" ></inputbox>
+        </col>
+        <col column="kpi" label="KPI" clickorderby="true">
+            <inputbox type="textbox" ></inputbox>
+        </col>
+        <group label="完成情况">
+            <col column="finishkpi" label="KPI" clickorderby="true"/>
+            <col column="finishresult" label="结果" clickorderby="true">
+                <inputbox type="combox">
+                    <option dataset="@{select * from v_data where ddtype='finishresult'}" label="name" value="code"></option>
+                </inputbox>
+            </col>
+        </group>
+        <col column="remark" label="备注" clickorderby="true" align="left">
+            <inputbox type="textareabox"  styleproperty="style='width:100%;'"></inputbox>
+        </col>
+    </display>
+    <sql>
+      <select>
+      <value><![CDATA[      select * from v_kpi    where {#condition#}
+                                                            order by credate desc
+      ]]></value>
+      				<condition name="creym" label="下达时间" labelposition="left">
+                        <value>
+                            <![CDATA[
+                                          creym = '#data#'
+                                ]]>
+                        </value>
+                        <inputbox type="datepicker"  dateformat="yyyy-MM"></inputbox>
+                    </condition>
+      				<condition name="touser_name" label="责任人" labelposition="left">
+                        <value>
+                            <![CDATA[
+                                       touser_name like '%#data#%'
+                                ]]>
+                        </value>
+                    </condition>
+                    <condition name="creuser" label="创建人" labelposition="left" hidden="true" defaultvalue="session{admin.username}">
+                        <value>
+                            <![CDATA[
+                                       creuser='#data#'
+                                ]]>
+                        </value>
+                    </condition>
+      </select>
+      <insert>
+      <![CDATA[
+      insert into t_kpi(
+			,@{content},@{touser},@{finishdate},@{finishflag},@{kpi},
+			@{finishkpi},@{finishresult},@{remark},creuser=session{admin.username},credate=now())
+      ]]>
+      </insert>
+      <update>
+      <![CDATA[
+      update t_kpi(@{content},@{touser},@{finishdate},@{finishflag},@{kpi},
+      @{finishkpi},@{finishresult},@{remark},ediuser=session{admin.username},edidate=now())
+      where id=@{id}
+      ]]>
+      </update>
+      <delete><![CDATA[delete from t_kpi where id=@{id}]]></delete>
+    </sql>
+      <format>
+          <value>
+              <![CDATA[
+                      touser=touser_name;
+                      creuser=creuser_name;
+                      finishresult=finishresult_name;
+                      ]]>
+          </value>
+      </format>
+  </report>
+</page>
+
+
+
+
+ <!-- KPI管理 -->
+<page id="kpi_list">
+  <report id="report1"  extends="t_kpi_list.report1" type="list">   
+    <sql>
+      <select>
+      <value><![CDATA[      select * from v_kpi    where {#condition#}
+                                                                            order by credate desc
+       ]]></value>
+      				<condition name="credate" label="下达时间" labelposition="left">
+                        <value>
+                            <![CDATA[
+                                       left(credate,7) = '#data#'
+                                ]]>
+                        </value>
+                        <inputbox type="datepicker"  dateformat="yyyy-MM"></inputbox>
+                    </condition>
+                      <condition name="creuser_name" label="下达人" labelposition="left">
+                          <value>
+                              <![CDATA[
+                                                   creuser_name like '%#data#%'
+                                            ]]>
+                          </value>
+                      </condition>
+                      <condition name="touser_name" label="责任人" labelposition="left">
+                          <value>
+                              <![CDATA[
+                                                   touser_name like '%#data#%'
+                                            ]]>
+                          </value>
+                      </condition>
+                      <condition name="finishresult" label="完成情况" labelposition="left">
+                          <value>
+                              <![CDATA[
+                                                               finishresult like '%#data#%'
+                                                        ]]>
+                          </value>
+                          <inputbox type="combox">
+                              <option label="全部" value=""></option>
+                              <option dataset="@{select * from v_data where ddtype='finishresult'}" label="name" value="code"></option>
+                          </inputbox>
+                      </condition>
+      </select>  
+    </sql>
+  </report>
+</page>
+
+
+
+</applications>
